@@ -19,8 +19,8 @@
 
 ### 2. 安装
 ```bash
-git clone <your-repo-url>
-cd bazi-fortune-app
+git clone https://github.com/Veralovescoding/suanming.git
+cd suanming
 npm install
 ```
 
