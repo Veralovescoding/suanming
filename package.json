@@ -1,0 +1,19 @@
+{
+  "name": "bazi-fortune-app",
+  "version": "0.1.0",
+  "description": "八字命理分析 MVP",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "dependencies": {
+    "@capacitor/cli": "^8.2.0",
+    "@capacitor/core": "^8.2.0",
+    "@capacitor/ios": "^8.2.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "multer": "^2.1.1",
+    "pdf-parse": "^2.4.5"
+  }
+}

@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>咕噜相师 - 开启星辰之旅</title>
+    <style>
+      :root {
+        --bg-color: #0c0c1e;
+        --card-bg: #1a1a3a;
+        --accent-color: #a29bfe;
+        --text-color: #e0e0e0;
+        --muted-text: #b0b0b0;
+        --input-bg: #25254d;
+        --primary-btn: #6c5ce7;
+      }
+      body { 
+        font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; 
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        max-width: 1000px; 
+        margin: 0 auto; 
+        padding: 40px 20px;
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 30px;
+      }
+      @media (max-width: 900px) { body { grid-template-columns: 1fr; } }
+
+      .header-logo { grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; }
+      h1 { color: var(--accent-color); font-weight: 300; letter-spacing: 4px; font-size: 32px; margin: 0; }
+      
+      .main-card { background: var(--card-bg); padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+      .side-card { background: rgba(26, 26, 58, 0.6); padding: 20px; border-radius: 20px; height: fit-content; border: 1px solid #ffffff11; }
+
+      .form-group { margin-bottom: 20px; position: relative; }
+      label { display: block; margin-bottom: 8px; font-size: 14px; color: var(--accent-color); }
+      input, select, textarea { 
+        width: 100%; padding: 12px; border-radius: 10px; border: none; 
+        background: var(--input-bg); color: white; box-sizing: border-box; font-size: 15px;
+      }
+      
+      #cityList { position: absolute; top: 100%; left: 0; right: 0; background: var(--input-bg); border-radius: 10px; max-height: 150px; overflow-y: auto; z-index: 100; display: none; }
+      #cityList div { padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #ffffff11; font-size: 13px; }
+      #cityList div:hover { background: var(--primary-btn); }
+
+      .row { display: flex; gap: 15px; }
+      .row > div { flex: 1; }
+
+      button#run { 
+        width: 100%; padding: 15px; border-radius: 12px; border: none;
+        background: linear-gradient(135deg, var(--primary-btn), #a29bfe);
+        color: white; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px;
+      }
+
+      /* Result area */
+      pre { white-space: pre-wrap; background: #25254d77; padding: 20px; border-radius: 15px; border-left: 4px solid var(--accent-color); font-size: 14px; color: #f0f0f0; margin-top: 20px; }
+
+      /* History & RAG */
+      .list-item { padding: 10px; border-bottom: 1px solid #ffffff11; font-size: 13px; cursor: pointer; }
+      .list-item:hover { background: #ffffff08; }
+      .tab-title { font-weight: bold; color: var(--accent-color); margin-bottom: 15px; border-bottom: 2px solid var(--accent-color); padding-bottom: 5px; }
+
+      .panel-content { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #ffffff11; }
+      .panel-content.show { display: block; }
+
+      .btn-small { padding: 6px 12px; border-radius: 6px; border: none; font-size: 12px; cursor: pointer; background: var(--input-bg); color: var(--text-color); }
+      .active { background: var(--primary-btn); }
+    </style>
+  </head>
+  <body>
+    <div class="header-logo">
+      <span style="font-size: 50px;">🐱</span>
+      <h1>咕噜相师</h1>
+    </div>
+    
+    <div class="main-card">
+      <div class="row">
+        <div class="form-group">
+          <label>出生日期</label>
+          <input id="birthDate" type="date" value="1995-01-01" />
+        </div>
+        <div class="form-group">
+          <label>出生时间</label>
+          <input id="birthTime" type="time" value="12:00" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>性别</label>
+          <select id="gender"><option>女</option><option>男</option></select>
+        </div>
+        <div class="form-group">
+          <label>出生城市</label>
+          <input id="city" type="text" placeholder="全球搜索..." autocomplete="off" />
+          <div id="cityList"></div>
+        </div>
+      </div>
+
+      <button id="run">揭晓命理奥秘</button>
+
+      <pre id="result">在左侧填入信息，开启你的星辰之旅...</pre>
+
+      <div style="margin-top: 30px;">
+        <div class="panel-title" style="cursor: pointer; color: var(--muted-text); font-size: 14px;" onclick="document.getElementById('adv').classList.toggle('show')">
+          ⚙️ 高级实验室 (版本 & RAG & 参数)
+        </div>
+        <div id="adv" class="panel-content">
+          <div class="form-group">
+            <label>AI 温度: <span id="tempValue">0.7</span></label>
+            <input id="temperature" type="range" min="0" max="1.5" step="0.1" value="0.7" oninput="document.getElementById('tempValue').textContent = this.value" />
+          </div>
+          <div class="form-group">
+            <label>知识库 (RAG) 状态: <span id="ragStatus">已禁用</span></label>
+            <button id="toggleRag" class="btn-small">启用知识库</button>
+            <input type="file" id="ragUpload" style="margin-top:10px; font-size:12px;" />
+          </div>
+          <div class="form-group">
+            <label>Prompt 版本</label>
+            <select id="promptSelect"></select>
+            <textarea id="customPrompt" rows="6" style="margin-top:10px;"></textarea>
+            <div class="row" style="margin-top:8px;">
+              <input id="verName" type="text" placeholder="新版本名" style="font-size:12px;" />
+              <button id="saveVer" class="btn-small">保存</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-card">
+      <div class="tab-title">📜 算命记录</div>
+      <div id="historyList" style="max-height: 400px; overflow-y: auto;"></div>
+      <button onclick="clearHistory()" class="btn-small" style="width:100%; margin-top:10px;">清空记录</button>
+    </div>
+
+    <script>
+      let allPrompts = [];
+      let allHistory = [];
+      let useRag = false;
+
+      // --- City Search ---
+      const cityIn = document.getElementById('city');
+      const cityList = document.getElementById('cityList');
+      cityIn.oninput = () => {
+        const q = cityIn.value.trim();
+        if (q.length < 2) return cityList.style.display = 'none';
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&featuretype=city&limit=5`)
+          .then(r => r.json()).then(data => {
+            cityList.innerHTML = data.map(i => `<div onclick="setCity('${i.display_name.replace(/'/g, "\\'")}')">${i.display_name}</div>`).join('');
+            cityList.style.display = 'block';
+          });
+      };
+      function setCity(v) { cityIn.value = v; cityList.style.display = 'none'; }
+
+      // --- RAG ---
+      document.getElementById('toggleRag').onclick = () => {
+        useRag = !useRag;
+        document.getElementById('ragStatus').textContent = useRag ? '已启用' : '已禁用';
+        document.getElementById('toggleRag').classList.toggle('active');
+      };
+      document.getElementById('ragUpload').onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('name', file.name);
+        await fetch('/api/rag', { method: 'POST', body: formData });
+        alert('知识库文档已上传');
+      };
+
+      // --- History ---
+      async function loadHistory() {
+        try {
+          const resp = await fetch('/api/history');
+          allHistory = await resp.json();
+          const listEl = document.getElementById('historyList');
+          listEl.innerHTML = allHistory.map((h, index) => `
+            <div class="list-item" onclick="showHistoryItem(${index})">
+              <b>${h.timestamp}</b><br/>
+              <span class="muted">${h.input.birthDate} ${h.input.gender || ''}</span>
+            </div>
+          `).join('');
+        } catch (e) { console.error("加载历史失败", e); }
+      }
+      function showHistoryItem(index) {
+        const item = allHistory[index];
+        if (item) {
+          document.getElementById('result').textContent = item.result;
+          document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+      async function clearHistory() { await fetch('/api/history', { method: 'DELETE' }); loadHistory(); }
+
+      // --- Prompts ---
+      async function loadPrompts() {
+        const resp = await fetch('/api/prompts');
+        allPrompts = await resp.json();
+        const sel = document.getElementById('promptSelect');
+        sel.innerHTML = allPrompts.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        sel.onchange = () => {
+          const p = allPrompts.find(x => x.id === sel.value);
+          if (p) document.getElementById('customPrompt').value = p.content;
+        };
+        if (allPrompts.length > 0) sel.onchange();
+      }
+      document.getElementById('saveVer').onclick = async () => {
+        const name = document.getElementById('verName').value;
+        const content = document.getElementById('customPrompt').value;
+        await fetch('/api/prompts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, content })
+        });
+        document.getElementById('verName').value = '';
+        loadPrompts();
+      };
+
+      // --- RUN ---
+      document.getElementById('run').onclick = async () => {
+        const resEl = document.getElementById('result');
+        resEl.textContent = '🌌 正在观测星象...';
+        const payload = {
+          birthDate: document.getElementById('birthDate').value,
+          birthTime: document.getElementById('birthTime').value,
+          gender: document.getElementById('gender').value,
+          city: cityIn.value,
+          customPromptTemplate: document.getElementById('customPrompt').value,
+          useRag,
+          settings: { temperature: document.getElementById('temperature').value }
+        };
+        try {
+          const resp = await fetch('/api/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await resp.json();
+          if (data.error) throw new Error(data.error);
+          resEl.textContent = data.result;
+          await loadHistory();
+        } catch (e) {
+          resEl.textContent = "🌠 信号干扰: " + e.message;
+        }
+      };
+
+      loadPrompts(); loadHistory();
+    </script>
+  </body>
+</html>
